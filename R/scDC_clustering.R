@@ -82,7 +82,7 @@ scDC_clustering <- function (exprsMat = NULL,
   }
   df <- data.frame(cellTypes = cellTypes, subject = subject)
   # thetahat <- .bootstrap_clustering(x, exprsMat, cellTypes, subject, verbose = verbose)
-  calProp_hat <- .bootstrap_clustering(x, exprsMat, cellTypes, subject, verbose = verbose)
+  calProp_hat <- .bootstrap_clustering(x, exprsMat, cellTypes, subject, ncores = ncores, verbose = verbose)
   thetahat <- calProp_hat$prop
   nhat <- calProp_hat$count
 

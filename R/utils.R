@@ -24,13 +24,14 @@
   return(list(count = tab_count, prop = tab_prop))
 }
 
-.scran_high_var <- function(exprsMat, topn = 1000){
-  dec <- scran::modelGeneVar(exprsMat)
+.scran_high_var <- function(exprsMat, ncores = 1, topn = 1000){
+  dec <- scran::modelGeneVar(exprsMat,
+    BPPARAM = BiocParallel::MulticoreParam(workers = ncores))
   scran::getTopHVGs(dec, n = topn)
 }
 
 
-.bootstrap_clustering <- function(x, exprsMat, cellTypes, subject, verbose = FALSE){
+.bootstrap_clustering <- function(x, exprsMat, cellTypes, subject, ncores = 1, verbose = FALSE){
   #get the expression matrix
   exprsMat <- exprsMat[,x]
 
@@ -40,7 +41,7 @@
 
   exprsMat <- exprsMat[nonZeroVar,]
 
-  hvg <- .scran_high_var(exprsMat)
+  hvg <- .scran_high_var(exprsMat, ncores = ncores)
   pca <- stats::prcomp(t(exprsMat[hvg,]), scale. = TRUE)$x[,1:10]
 
   num_G = length(unique(cellTypes))
@@ -49,9 +50,15 @@
   while (is.null(label) | length(unique(label)) != length(unique(cellTypes))){
     label = NULL
 
-    if (verbose) print("scClust::scClust...")
-    kmeans.result <- scClust::scClust(t(pca), num_G, similarity = "pearson", method = "kmeans", seed = 1, nstart = 100, iter.max = 1000)
-
+    if (verbose) print(paste0("Performing k-means clustering on K=", num_G))
+    kmeans.result <- scClust::scClust(
+      t(pca), num_G,
+      similarity = "pearson",
+      method = "kmeans",
+      seed = 1,
+      nstart = 100,
+      iter.max = 1000
+    )
 
     confusion <- table(cellTypes[x], kmeans.result$cluster)
 
