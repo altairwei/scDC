@@ -49,6 +49,7 @@
   while (is.null(label) | length(unique(label)) != length(unique(cellTypes))){
     label = NULL
 
+    if (verbose) print("scClust::scClust...")
     kmeans.result <- scClust::scClust(t(pca), num_G, similarity = "pearson", method = "kmeans", seed = 1, nstart = 100, iter.max = 1000)
 
 
