@@ -24,12 +24,9 @@
   return(list(count = tab_count, prop = tab_prop))
 }
 
-.scran_high_var <- function(exprsMat,topn=1000){
-  topn <- min(topn, nrow(exprsMat))
-  var.fit <- scran::trendVar(exprsMat, method="loess")
-  var.out <- scran::decomposeVar(exprsMat, var.fit)
-  hvg.out <- var.out[order(var.out$bio, decreasing=TRUE)[1:topn], ]
-  return(rownames(hvg.out))
+.scran_high_var <- function(exprsMat, topn = 1000){
+  dec <- scran::modelGeneVar(exprsMat)
+  scran::getTopHVGs(dec, n = topn)
 }
 
 
